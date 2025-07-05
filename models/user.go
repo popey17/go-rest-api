@@ -1,6 +1,9 @@
 package models
 
-import "github.com/popey17/go-rest-api/db"
+import (
+	"github.com/popey17/go-rest-api/db"
+	"github.com/popey17/go-rest-api/utils"
+)
 
 type User struct {
 	ID       int64
@@ -17,7 +20,9 @@ func (u *User) Save() error {
 
 	defer stmt.Close()
 
-	result, err := stmt.Exec(u.Email, u.Password)
+	hashedPassword := utils.HashPassword(u.Password)
+
+	result, err := stmt.Exec(u.Email, hashedPassword)
 	if err != nil {
 		return err
 	}

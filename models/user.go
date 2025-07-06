@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+
 	"github.com/popey17/go-rest-api/db"
 	"github.com/popey17/go-rest-api/utils"
 )
@@ -31,5 +33,25 @@ func (u *User) Save() error {
 
 	u.ID = lastID
 	return err
+
+}
+
+func (u *User) ValidateUser() error {
+	query := `SELECT id, password FROM users WHERE email = ?`
+	resultRow := db.DB.QueryRow(query, u.Email)
+
+	var hashedPassword string
+	err := resultRow.Scan(&u.ID, &hashedPassword)
+	if err != nil {
+		return err
+	}
+
+	isValid := utils.ComparePassword(hashedPassword, u.Password)
+
+	if !isValid {
+		return errors.New("invalid password")
+	}
+
+	return nil
 
 }
